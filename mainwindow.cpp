@@ -24,19 +24,31 @@ MainWindow::~MainWindow()
 void MainWindow::FilePatcher(){
 
     QMap<int,char> differenceBetweenFiles; //Map, в него мы будем заносить int - положение отличия между файлами и char - самое отличие
+    QByteArray fileNameIn1QB = fileNameIn1.toLocal8Bit();
+    QByteArray fileNameIn2QB = fileNameIn2.toLocal8Bit();
+    const char *fileNameIn1Char = fileNameIn1QB.data();
+    const char *fileNameIn2Char = fileNameIn2QB.data();
 
-    QFile filePatch("patch.txt"); //Файл с патчем
-    QFile file1(fileNameIn1);//Файл 1
-    QFile file2(fileNameIn2);//Файл 2
+    QFile filePatch("patch.dat"); //Файл с патчем
+    //QFile file1(fileNameIn1);//Файл 1
+    FILE* file1;
+    file1 = fopen(fileNameIn1Char,"rb");
+    FILE* file2;
+    file2 = fopen(fileNameIn2Char,"rb");
+    //QFile file2(fileNameIn2);//Файл 2
 
     QSaveFile file1ToSave(fileNameIn1);//Чтобы сохранить файл в бинарном формате, надо его открыть с помощью QSaveFile
+    QByteArray num1;
+    QByteArray num2;
+    QByteArray patchData,compressedPatch;
+
+    //file1.open(QIODevice::ReadWrite); //Открываем файлы
+    fread(&num1,num1.size(),1,file1);
+    fread(&num2,num2.size(),1,file2);
+    //file2.open(QIODevice::ReadOnly);
 
 
-    file1.open(QIODevice::ReadWrite); //Открываем файлы
-    file2.open(QIODevice::ReadOnly);
-
-    QByteArray num1 = file1.readAll(); //Читаем их в переменные QByteArray
-    QByteArray num2 = file2.readAll();
+   // QByteArray num2 = file2.readAll();
 
     int maxArray = std::max(num1.size(),num2.size()); //Понадобится при прохождении по циклу
 
@@ -51,16 +63,22 @@ void MainWindow::FilePatcher(){
             if(num1[i]!=num2[i]){
 
                 differenceBetweenFiles.insert(i,num2[i]);//Выводим все это в файл fiilePatch(patch.txt)
-                out << i << ":" << num2[i] << "\n";
+                patchData += i;
+                patchData += ":";
+                patchData += num2[i];
             }
         }
+
+        compressedPatch = qCompress(patchData,9);
+        filePatch.write(compressedPatch);
         filePatch.close();
     }
 
     if (filePatch.open(QIODevice::ReadOnly)){ //Открываем ещё раз filePatch, но уже для чтения
-        QTextStream in(&filePatch);
-        while (!in.atEnd()) {
-            QString line = in.readLine(); //Читаем файл патча
+        QByteArray uncompressedPatch1 = filePatch.readAll();
+        QByteArray uncompressedPatch = qUncompress(uncompressedPatch1);
+        while (!filePatch.atEnd()) {
+            QString line = QString(uncompressedPatch); //Читаем файл патча
             //В патчере данные внесены в формат вида 0:a, где 0 - позиция в файле, которая отличается, и a - сам отличающийся элемент. Они разделены :
             keyFromFile = line.section(':',0,0); //Берем первый элемент и пишем его в как позицию в файле
             valueFromFile = line.section(':',1,1); //Берем второй элемент и пишем его как элемент, который будем вставлять
@@ -78,15 +96,17 @@ void MainWindow::FilePatcher(){
     }
 
     else qDebug()<< "Cant open file";
+    fclose(file1);
+    fclose(file2);
 
-    file1.close();
-    file2.close();
+    fopen(fileNameIn1Char,"wb");
+    fwrite(&num1,num1.size(),1,file1);
+    fclose(file1);
 
-    if (file1ToSave.open(QIODevice::WriteOnly)){ //Сохраняем весь наш QByteArray в файл
+    /*if (file1ToSave.open(QIODevice::WriteOnly)){ //Сохраняем весь наш QByteArray в файл
         file1ToSave.write(num1);
-        file1ToSave.commit();
-
-    }
+        file1ToSave.commit()
+        }*/
 
 }
 void MainWindow::on_file1Button_clicked()
