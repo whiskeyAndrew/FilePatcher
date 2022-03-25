@@ -18,10 +18,12 @@ public:
     QString valueFromFile, keyFromFile; //данные которые мы будем вычитывать из файла патчера
     std::string tempValueFromFile; //костыльная переменная, описывал в вписывании файла
     char charTempValueFromFile; //ещё одна костыльная переменная, туда же относится
-    QString fileNameIn1,fileNameIn2; //названия файлов для вывода их на экран приложения
+    QString fileNameIn1,fileNameIn2,patchFileName; //названия файлов для вывода их на экран приложения
 
     int keyBuf; //переменная, которую мы будем вставлять в QByteArray, находится рядом с костылями, эта не костыльная и важная
     void FilePatcher();//Наша функция
+    void CreatePatch();
+    QByteArray GetNum1();
 
 
 
@@ -32,5 +34,7 @@ private slots:
     void on_workButton_clicked();
     void on_file1Button_clicked();
     void on_file2Button_clicked();
+    void on_pushButton_clicked();
+    void on_pushButton_2_clicked();
 };
 #endif // MAINWINDOW_H
