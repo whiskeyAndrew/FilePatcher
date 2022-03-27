@@ -15,12 +15,8 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    QString valueFromFile, keyFromFile; //данные которые мы будем вычитывать из файла патчера
-    std::string tempValueFromFile; //костыльная переменная, описывал в вписывании файла
-    char charTempValueFromFile; //ещё одна костыльная переменная, туда же относится
     QString fileNameIn1,fileNameIn2,patchFileName; //названия файлов для вывода их на экран приложения
 
-    int keyBuf; //переменная, которую мы будем вставлять в QByteArray, находится рядом с костылями, эта не костыльная и важная
     void FilePatcher();//Наша функция
     void CreatePatch();
     QByteArray GetNum1();
