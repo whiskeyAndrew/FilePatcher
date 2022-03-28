@@ -19,7 +19,7 @@ public:
 
     void FilePatcher();//Наша функция
     void CreatePatch();
-    QByteArray GetNum1();
+    QByteArray GetFile1ByteArray();
 
 
 
